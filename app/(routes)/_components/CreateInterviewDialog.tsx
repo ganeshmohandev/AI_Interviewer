@@ -43,6 +43,8 @@ function CreateInterviewDialog() {
 
         formData_.append('jobTitle',formData?.jobTitle);
         formData_.append('jobDescription',formData?.jobDescription);
+        //formData_.append('candidateName',formData?.candidateName);
+        //formData_.append('candidateEmail',formData?.candidateEmail);
         try {
       
             const res=await axios.post('api/generate-interview-questions',formData_);
@@ -63,10 +65,13 @@ function CreateInterviewDialog() {
                 resumeUrl: res.data?.resumeUrl??'',
                 userId: userDetail?._id,
                 jobTitle: res.data?.jobTitle??'',
-                jobDescription: res.data?.jobDescription??''
+                jobDescription: res.data?.jobDescription??'',
+                 candidateName: formData?.candidateName??'',
+                candidateEmail: formData?.candidateEmail??''
             });
             console.log(interviewId);
             router.push('/interview/'+interviewId);
+            //router.push('/dashboard');
 
         }
         catch(e) {

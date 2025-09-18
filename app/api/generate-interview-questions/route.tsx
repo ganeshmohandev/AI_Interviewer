@@ -94,7 +94,7 @@ console.log('Cloudinary upload response', uploadResponse);
 }
 else {
     //call n8n webhook
-  
+    console.log('Webhook response started');
     const result=await axios.post("http://localhost:5678/webhook/generate-interview-questions", {
         resumeUrl:null,
         jobTitle:jobTitle,

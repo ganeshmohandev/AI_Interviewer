@@ -14,7 +14,9 @@ type props={
 function InterviewCard({ interviewInfo }: props) {
   return (
     <div className='p-4 border rounded-xl'>
-    <h2 className='font-semibold text-xl flex justify-between items-center'> {interviewInfo?.resumeUrl ? 'Resume Interview': interviewInfo.jobTitle}  <Badge>{interviewInfo?.status}</Badge></h2>
+    <h2 className='font-semibold text-xl flex justify-between items-center'> {interviewInfo?.resumeUrl ? 'Resume Interview': interviewInfo.candidateName}  <Badge>{interviewInfo?.status}</Badge></h2>
+    <h2 className='font-semibold text-xl flex justify-between items-center'> {interviewInfo?.resumeUrl ? 'Resume Interview': interviewInfo.candidateEmail} </h2>
+        <p className='line-clamp-2 text-gray-500'>{interviewInfo?.resumeUrl ? 'We generated Interview from the uploaded resume': interviewInfo.jobTitle}</p>
     <p className='line-clamp-2 text-gray-500'>{interviewInfo?.resumeUrl ? 'We generated Interview from the uploaded resume': interviewInfo.jobDescription}</p>
     <div className='mt-5 flex justify-between items-center'>
        {interviewInfo?.Feedback && <FeedbackDialog fedbackInfo={interviewInfo.Feedback} />}

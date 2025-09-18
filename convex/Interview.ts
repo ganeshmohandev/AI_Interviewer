@@ -7,7 +7,9 @@ export const SaveInterviewQuestions=mutation({
         resumeUrl:v.union(v.string(),v.null()),
         userId: v.id('UserTable'),
         jobTitle: v.union(v.string(),v.null()),
-        jobDescription: v.union(v.string(),v.null())
+        jobDescription: v.union(v.string(),v.null()),
+         candidateName: v.union(v.string(),v.null()),
+        candidateEmail: v.union(v.string(),v.null())
     },
     handler: async (ctx, args) => {
      
@@ -18,7 +20,9 @@ export const SaveInterviewQuestions=mutation({
               userId: args.userId,
               status: 'draft',
               jobTitle: args.jobTitle??'',
-              jobDescription: args.jobDescription??''
+              jobDescription: args.jobDescription??'',
+                candidateName: args.candidateName??'',
+              candidateEmail: args.candidateEmail??''
       });
       return result;
     }

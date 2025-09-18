@@ -3,8 +3,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
-.video {
-transform: scale(1.5) translateY(15%) !important;
+.agora_video_player {
+transform: scale(2) translateY(15%) !important;
 }
 
 @theme inline {

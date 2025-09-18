@@ -5,7 +5,17 @@ import React from 'react'
 function JobDescription({onHandleInputChange}:any) {
   return (
     <div className='border rounded-2xl p-10'>
-        <div>
+       <div>
+            <label>Candidate Name</label>
+    <Input placeholder='Ex. John Doe' 
+    onChange={(event)=>onHandleInputChange('candidateName',event.target.value)}/>
+        </div>
+        <div className='mt-6'>
+            <label>Candidate Email</label>
+    <Input placeholder='Ex. john.doe@example.com' 
+    onChange={(event)=>onHandleInputChange('candidateEmail',event.target.value)}/>
+        </div>
+        <div className='mt-6'>
             <label>Job Title</label>
     <Input placeholder='Ex. Full Stack React Developer' 
     onChange={(event)=>onHandleInputChange('jobTitle',event.target.value)}/>
