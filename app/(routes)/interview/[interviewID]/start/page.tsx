@@ -14,6 +14,9 @@ import { FeedbackInfo } from '@/app/(routes)/dashboard/_components/FeedbackDialo
 import RecordRTC, { RecordRTCPromisesHandler } from 'recordrtc';
 import { saveAs } from 'file-saver';
 import { Player } from 'video-react'
+ // Import the correct type from openai
+  import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+  import OpenAI from 'openai';
 
 
 export type InterviewData = {
@@ -38,6 +41,11 @@ type Messages = {
   from: 'user' | 'bot',
   text: string
 }
+
+const openai = new OpenAI({
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY, // Store your API key in env variable
+  dangerouslyAllowBrowser: true, // Allow usage in the browser (not recommended for production)
+});
 
 const CONTAINER_ID = 'akool_avatar_container';
 //const AVATAR_ID = 'data_lira_sp-02';
@@ -112,10 +120,10 @@ function StartInterview() {
     } else {
       // Get screen video, then merge with microphone audio
       const screenStream = await (mediaDevices as any).getDisplayMedia({
-        
+
         video: true,
         audio: true,// getDisplayMedia's audio is unreliable across browsers
-        preferCurrentTab: true, 
+        preferCurrentTab: true,
       });
       const audioStream = await mediaDevices.getUserMedia({
         audio: true,
@@ -158,8 +166,7 @@ function StartInterview() {
   const stopRecording = async () => {
     if (recorder) {
       await recorder.stopRecording()
-      let blob: Blob = await recorder.getBlob()
-        ; (stream as any).stop()
+      let blob: Blob = await recorder.getBlob(); (stream as any).stop();
       // Ensure blob has correct type and size
       if (blob && blob.size > 0 && blob.type !== 'video/mp4') {
         blob = new Blob([blob], { type: 'video/mp4' });
@@ -180,7 +187,16 @@ function StartInterview() {
       console.log("Blob", blob, "size:", blob.size, "type:", blob.type);
       setStream(null)
       setRecorder(null)
-      downloadVideo();
+      
+       // Stop webcam and microphone streams if active
+    // Find the video element and stop its stream
+    // const videoEl = document.querySelector('video');
+    // if (videoEl && videoEl.srcObject) {
+    //   const tracks = (videoEl.srcObject as MediaStream).getTracks();
+    //   tracks.forEach(track => track.stop());
+    //   videoEl.srcObject = null;
+    // }
+      //downloadVideo();
     }
   }
 
@@ -252,8 +268,10 @@ function StartInterview() {
     setMicOn(false);
     setJoined(false);
 
+   
+
     await GenerateFeedback();
-      await stopRecording();
+    await stopRecording();
     //router.replace('/');
   }
 
@@ -271,21 +289,60 @@ function StartInterview() {
   })
 
   const GenerateFeedback = async () => {
-    toast.warning("Generating feedback... Please wait...");
-    console.log("Generating feedback for messages:", message);
-    const result = await axios.post("/api/interview-feedback", {
-      messages: message
-    });
-    console.log(result.data);
-    //toast.success("Feedback generated successfully");
+    if (process.env.NEXT_PUBLIC_N8N_ENABLED === "true") {
+      toast.warning("Generating feedback... Please wait...");
+      console.log("Generating feedback for messages:", message);
+      const result = await axios.post("/api/interview-feedback", {
+        messages: message
+      });
+      console.log(result.data);
+      //toast.success("Feedback generated successfully");
 
+      const resp = await updateFeedback({
+        feedback: result.data,
+        //@ts-ignore
+        recordId: interviewID
+      });
+      console.log('feedback result:'+ resp);
+      toast.success('Interview completed. Feedback will send to the HR.');
+    }
+    else
+    {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4.1-mini', // Use the appropriate model name
+      messages: [
+        { role: 'system', content: 'Depends on User Interview Conversation message, generate feedback/report in details.  Suggest improvement if there is any. Also rate it out of 10. Give response in JSON with the field as feedback, list of suggestions and rating.' },
+        { role: 'user', content: `messages:${message}` }
+      ],
+    });
+    //console.log(completion.choices[0].message?.content);
+    let feedbackContent = "";
+    try {
+      feedbackContent = JSON.parse(completion.choices[0].message?.content ?? "");
+    } catch {
+      feedbackContent = completion.choices[0].message?.content ?? "";
+    }
+       // console.log('OpenAI response 123:'+feedbackContent);
+    // Remove leading/trailing backticks if present
+    //feedbackContent = feedbackContent.replace(/^`|`$/g, '');
+    // Remove "json" or "JSON" prefix if present
+    //feedbackContent = feedbackContent.replace(/^json\s*|^JSON\s*/i, '');
+    //console.log('OpenAI response', feedbackContent);
+    // Remove all backticks from feedbackContent
+    //feedbackContent  = feedbackContent.replace(/`/g, '');
+    // Remove leading/trailing backticks if present
+    //feedbackContent = feedbackContent.replace(/^`+|`+$/g, '');
+    console.log('OpenAI response', feedbackContent);
     const resp = await updateFeedback({
-      feedback: result.data,
+      feedback: feedbackContent,
       //@ts-ignore
       recordId: interviewID
-    });
-    console.log(resp);
-    toast.success('Interview completed. Feedback will send to the HR.');
+      });
+    
+      toast.success('Interview completed. Feedback will send to the HR.');
+    
+    }
+
     router.replace('/');
 
   }
@@ -366,13 +423,13 @@ Conclude the interview with a closing question (e.g., "Do you have any questions
               <div>
                 <div className="flex flex-col p-6 w-full  h-95 bg-white rounded-2xl  items-center justify-center">
                   <User size={100} className='text-gray-500' />
-                   <span className="mt-4 text-gray-500">AI Interviewer Preview</span>
+                  <span className="mt-4 text-gray-500">AI Interviewer Preview</span>
                 </div>
               </div>
             )
           }
         </div>
-        
+
       </div>
       <div className='flex flex-col lg:w-1/3'>
         <div>

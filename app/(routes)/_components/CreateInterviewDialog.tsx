@@ -19,7 +19,7 @@ import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { useUserDetailContext } from '@/app/Provider'
 import { UserDetailContext } from '@/context/UserDetailContext'
-import { form } from 'motion/react-client'
+import { form, tr } from 'motion/react-client'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 function CreateInterviewDialog() {
@@ -43,22 +43,18 @@ function CreateInterviewDialog() {
 
         formData_.append('jobTitle',formData?.jobTitle);
         formData_.append('jobDescription',formData?.jobDescription);
+
+        
         //formData_.append('candidateName',formData?.candidateName);
         //formData_.append('candidateEmail',formData?.candidateEmail);
         try {
-      
-            const res=await axios.post('api/generate-interview-questions',formData_);
+          console.log('N8N_ENABLED:'+process.env.NEXT_PUBLIC_N8N_ENABLED);
+           if(process.env.NEXT_PUBLIC_N8N_ENABLED === "true")
+           {
+             const res=await axios.post('api/generate-interview-questions',formData_);
           
             console.log('Result');
             console.log(res.data);
-
-           
-            // if(res?.data?.status==429)
-            // {
-            // toast.warning(res?.data?.result);
-            //   console.log(res?.data?.result);
-            //   return;
-            // }
             //Save the interview questions to the database
             const interviewId=await saveInterviewQuestion({
                 questions: res.data?.questions,
@@ -69,8 +65,35 @@ function CreateInterviewDialog() {
                  candidateName: formData?.candidateName??'',
                 candidateEmail: formData?.candidateEmail??''
             });
-            console.log(interviewId);
+             console.log(interviewId);
             router.push('/interview/'+interviewId);
+           }
+           else{
+             //Save the interview questions to the database
+            const interviewId=await saveInterviewQuestion({
+                questions: '',
+                resumeUrl: '',
+                userId: userDetail?._id,
+                jobTitle: formData?.jobTitle??'',
+                jobDescription: formData?.jobDescription??'',
+                 candidateName: formData?.candidateName??'',
+                candidateEmail: formData?.candidateEmail??''
+            });
+             console.log(interviewId);
+            router.push('/interview/'+interviewId);
+
+           }
+           
+
+           
+            // if(res?.data?.status==429)
+            // {
+            // toast.warning(res?.data?.result);
+            //   console.log(res?.data?.result);
+            //   return;
+            // }
+           
+           
             //router.push('/dashboard');
 
         }

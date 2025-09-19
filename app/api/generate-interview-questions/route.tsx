@@ -76,7 +76,7 @@ console.log('Cloudinary upload response', uploadResponse);
 
 
     //call n8n webhook
-    const result=await axios.post("http://localhost:5678/webhook/generate-interview-questions", {
+    const result=await axios.post(process.env.N8N_QUESTION_GENERATION_URL??'', {
         // resumeUrl: "https://ik.imagekit.io/Tubeguruji/upload-1754663363140_dgZLgWl1n.pdf"
         resumeUrl: uploadedUrl
     });
@@ -95,7 +95,7 @@ console.log('Cloudinary upload response', uploadResponse);
 else {
     //call n8n webhook
     console.log('Webhook response started');
-    const result=await axios.post("http://localhost:5678/webhook/generate-interview-questions", {
+    const result=await axios.post(process.env.N8N_QUESTION_GENERATION_URL??'', {
         resumeUrl:null,
         jobTitle:jobTitle,
         jobDescription:jobDescription

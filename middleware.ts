@@ -14,6 +14,8 @@ const isPublicRoute = createRouteMatcher([
   '/api/upload-interview-video(.*)',
 ])
 
+
+
 export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
     await auth.protect()
